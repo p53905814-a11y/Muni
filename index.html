@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VideoHub - Video Streaming Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: #030303;
+            padding-bottom: 60px; /* Space for social bar */
+        }
+        
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            height: 56px;
+            background-color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            height: 20px;
+            margin-right: 25px;
+            cursor: pointer;
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .menu-icon, .search-icon, .voice-search-icon, .upload-icon, .notifications-icon {
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        
+        .menu-icon:hover, .search-icon:hover, .voice-search-icon:hover, .upload-icon:hover, .notifications-icon:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .search-container {
+            display: flex;
+            align-items: center;
+            flex: 0 1 728px;
+            margin: 0 40px;
+        }
+        
+        .search-container form {
+            display: flex;
+            flex: 1;
+        }
+        
+        .search-input {
+            flex: 1;
+            height: 40px;
+            padding: 0 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 2px 0 0 2px;
+            border-right: none;
+        }
+        
+        .search-button {
+            height: 40px;
+            width: 64px;
+            border: 1px solid #ccc;
+            border-radius: 0 2px 2px 0;
+            background-color: #f8f8f8;
+            cursor: pointer;
+        }
+        
+        .voice-search-icon {
+            margin-left: 8px;
+            background-color: #f9f9f9;
+        }
+        
+        .right-icons {
+            display: flex;
+            align-items: center;
+        }
+        
+        .right-icons div {
+            margin-left: 8px;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            bottom: 0;
+            width: 240px;
+            background-color: white;
+            padding-top: 12px;
+            overflow-y: auto;
+            z-index: 99;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            height: 40px;
+            cursor: pointer;
+        }
+        
+        .sidebar-item:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .sidebar-item.active {
+            background-color: #e5e5e5;
+            font-weight: 500;
+        }
+        
+        .sidebar-item i {
+            margin-right: 24px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .sidebar-divider {
+            height: 1px;
+            background-color: #e5e5e5;
+            margin: 12px 0;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            margin-left: 240px;
+            margin-top: 56px;
+            padding: 20px;
+        }
+        
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        
+        .video-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .video-card:hover {
+            transform: scale(1.03);
+        }
+        
+        .thumbnail {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background-color: #e5e5e5;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .thumbnail img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .video-duration {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-size: 12px;
+        }
+        
+        .video-info {
+            display: flex;
+            margin-top: 12px;
+        }
+        
+        .channel-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #e5e5e5;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+        
+        .video-details {
+            flex: 1;
+        }
+        
+        .video-title {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.4;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .channel-name, .video-stats {
+            font-size: 14px;
+            color: #606060;
+        }
+        
+        /* Ad Slots Styles */
+        .ad-slot {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px dashed #ccc;
+        }
+        
+        .ad-label {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 6px;
+            font-size: 10px;
+            border-radius: 3px;
+            z-index: 2;
+        }
+        
+        .native-banner {
+            width: 100%;
+            height: 90px;
+            margin-top: 20px;
+            position: relative;
+        }
+        
+        .classic-banner {
+            margin: 20px auto;
+            position: relative;
+        }
+        
+        .banner-300x250 {
+            width: 300px;
+            height: 250px;
+        }
+        
+        .banner-728x90 {
+            width: 728px;
+            height: 90px;
+        }
+        
+        .banner-160x600 {
+            width: 160px;
+            height: 600px;
+            position: fixed;
+            right: 20px;
+            top: 80px;
+        }
+        
+        .banner-160x300 {
+            width: 160px;
+            height: 300px;
+        }
+        
+        .banner-468x60 {
+            width: 468px;
+            height: 60px;
+        }
+        
+        /* Social Bar Styles */
+        .social-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #f0f0f0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 60px;
+            z-index: 101;
+            border-top: 1px solid #ddd;
+        }
+        
+        /* Video Player Styles */
+        .video-player-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .video-player {
+            width: 80%;
+            max-width: 1000px;
+            background-color: black;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .video-player iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+        
+        .player-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .player-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+        
+        .player-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .close-player {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        /* Video Pop-up Ad Styles */
+        .video-popup-ad {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .popup-content {
+            width: 90%;
+            max-width: 800px;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: #222;
+            border-bottom: 1px solid #444;
+        }
+        
+        .popup-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .popup-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .popup-close:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .popup-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .popup-video-thumbnail {
+            width: 100%;
+            height: 300px;
+            background-color: #111;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .popup-video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .popup-play-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.4);
+            transition: background-color 0.3s;
+        }
+        
+        .popup-play-overlay:hover {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .popup-play-button {
+            width: 80px;
+            height: 80px;
+            background-color: rgba(255, 0, 0, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+            cursor: pointer;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        
+        .popup-play-button:hover {
+            transform: scale(1.1);
+            background-color: rgba(255, 0, 0, 0.9);
+        }
+        
+        .popup-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .popup-button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+        }
+        
+        .popup-watch-now {
+            background-color: #ff0000;
+            color: white;
+        }
+        
+        .popup-watch-now:hover {
+            background-color: #e60000;
+            transform: translateY(-2px);
+        }
+        
+        .popup-skip {
+            background-color: #444;
+            color: white;
+        }
+        
+        .popup-skip:hover {
+            background-color: #555;
+            transform: translateY(-2px);
+        }
+        
+        .popup-footer {
+            padding: 15px 20px;
+            background-color: #222;
+            text-align: center;
+            color: #aaa;
+            font-size: 12px;
+            border-top: 1px solid #444;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            .banner-160x600 {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .search-container {
+                margin: 0 10px;
+            }
+            
+            .banner-728x90, .banner-468x60 {
+                width: 100%;
+                max-width: 728px;
+            }
+            
+            .video-player {
+                width: 95%;
+            }
+            
+            .video-player iframe {
+                height: 300px;
+            }
+            
+            .popup-content {
+                width: 95%;
+            }
+            
+            .popup-video-thumbnail {
+                height: 200px;
+            }
+            
+            .popup-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .popup-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <div class="menu-icon"><i class="fas fa-bars"></i></div>
+            <!-- YouTube logo removed as requested -->
+        </div>
+        
+        <div class="search-container">
+            <form>
+                <input type="text" class="search-input" placeholder="Search videos...">
+                <button class="search-button"><i class="fas fa-search"></i></button>
+            </form>
+            <div class="voice-search-icon"><i class="fas fa-microphone"></i></div>
+        </div>
+        
+        <div class="right-icons">
+            <div class="upload-icon"><i class="fas fa-upload"></i></div>
+            <div class="notifications-icon"><i class="fas fa-bell"></i></div>
+            <div class="user-icon"><i class="fas fa-user-circle"></i></div>
+        </div>
+    </header>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-item active"><i class="fas fa-home"></i> Home</div>
+        <div class="sidebar-item"><i class="fas fa-fire"></i> Trending</div>
+        <div class="sidebar-item"><i class="fas fa-play-circle"></i> Subscriptions</div>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-item"><i class="fas fa-folder"></i> Library</div>
+        <div class="sidebar-item"><i class="fas fa-history"></i> History</div>
+        <div class="sidebar-item"><i class="fas fa-clock"></i> Your videos</div>
+        <div class="sidebar-item"><i class="fas fa-eye"></i> Watch later</div>
+        <div class="sidebar-item"><i class="fas fa-thumbs-up"></i> Liked videos</div>
+        <div class="sidebar-divider"></div>
+        <h3 style="padding: 8px 24px; font-size: 14px; color: #606060;">SUBSCRIPTIONS</h3>
+        <div class="sidebar-item"><i class="fas fa-user-circle"></i> Nature Channel</div>
+        <div class="sidebar-item"><i class="fas fa-user-circle"></i> Coding Master</div>
+        <div class="sidebar-item"><i class="fas fa-user-circle"></i> Travel Guide</div>
+        <div class="sidebar-item"><i class="fas fa-user-circle"></i> Cooking Master</div>
+        <div class="sidebar-divider"></div>
+        <h3 style="padding: 8px 24px; font-size: 14px; color: #606060;">MORE FROM VIDEOHUB</h3>
+        <div class="sidebar-item"><i class="fas fa-film"></i> Premium</div>
+        <div class="sidebar-item"><i class="fas fa-gamepad"></i> Gaming</div>
+        <div class="sidebar-item"><i class="fas fa-broadcast-tower"></i> Live</div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Native Banner Ad Slot -->
+        <div class="ad-slot native-banner">
+            <div class="ad-label">ADVERTISEMENT</div>
+            <!-- Adsterra Native Banner Code Here -->
+            <script async="async" data-cfasync="false" src="//bedsidemeasuring.com/569eb00a4ebc72f5e4653018c5846ed8/invoke.js"></script>
+            <div id="container-569eb00a4ebc72f5e4653018c5846ed8"></div>
+        </div>
+        
+        <!-- Classic Banner Ad Slot - 728x90 -->
+        <div class="ad-slot classic-banner banner-728x90">
+            <div class="ad-label">ADVERTISEMENT</div>
+            <!-- Adsterra 728x90 Banner Code Here -->
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : '409c845c49d0991c7a1d22dfc385411b',
+                    'format' : 'iframe',
+                    'height' : 90,
+                    'width' : 728,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="//bedsidemeasuring.com/409c845c49d0991c7a1d22dfc385411b/invoke.js"></script>
+        </div>
+        
+        <!-- Video Grid -->
+        <div class="video-grid">
+            <!-- Video Card 1 -->
+            <div class="video-card" onclick="openVideoPlayer('https://www.eporner.com/embed/3iAuekw3ldC/')">
+                <div class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1574263867128-a3d5c1b1deae?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Nature Documentary">
+                    <div class="video-duration">10:30</div>
+                </div>
+                <div class="video-info">
+                    <div class="channel-icon"><i class="fas fa-leaf"></i></div>
+                    <div class="video-details">
+                        <div class="video-title">Amazing Nature Documentary - Wildlife in 4K</div>
+                        <div class="channel-name">Nature Channel</div>
+                        <div class="video-stats">1.2M views • 2 days ago</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Video Card 2 -->
+            <div class="video-card" onclick="openVideoPlayer('https://www.eporner.com/embed/q1I7c73yLk3/')">
+                <div class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1627398242454-45a1465c2479?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="JavaScript Tutorial">
+                    <div class="video-duration">15:45</div>
+                </div>
+                <div class="video-info">
+                    <div class="channel-icon"><i class="fas fa-code"></i></div>
+                    <div class="video-details">
+                        <div class="video-title">Learn JavaScript in 15 Minutes - Quick Tutorial</div>
+                        <div class="channel-name">Coding Master</div>
+                        <div class="video-stats">850K views • 1 week ago</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Classic Banner Ad Slot - 300x250 -->
+            <div class="ad-slot classic-banner banner-300x250">
+                <div class="ad-label">ADVERTISEMENT</div>
+                <!-- Adsterra 300x250 Banner Code Here -->
+                <script type="text/javascript">
+                    atOptions = {
+                        'key' : '6fe9035bf9ab5cd710ee67c710fac441',
+                        'format' : 'iframe',
+                        'height' : 250,
+                        'width' : 300,
+                        'params' : {}
+                    };
+                </script>
+                <script type="text/javascript" src="//bedsidemeasuring.com/6fe9035bf9ab5cd710ee67c710fac441/invoke.js"></script>
+            </div>
+            
+            <!-- Video Card 3 -->
+            <div class="video-card" onclick="openVideoPlayer('https://www.eporner.com/embed/T6OlCtwYho0/')">
+                <div class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Travel Destinations">
+                    <div class="video-duration">8:12</div>
+                </div>
+                <div class="video-info">
+                    <div class="channel-icon"><i class="fas fa-plane"></i></div>
+                    <div class="video-details">
+                        <div class="video-title">Top 10 Travel Destinations for 2023</div>
+                        <div class="channel-name">Travel Guide</div>
+                        <div class="video-stats">2.1M views • 3 days ago</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Video Card 4 -->
+            <div class="video-card" onclick="openVideoPlayer('https://www.eporner.com/embed/3iAuekw3ldC/')">
+                <div class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Cooking Steak">
+                    <div class="video-duration">22:05</div>
+                </div>
+                <div class="video-info">
+                    <div class="channel-icon"><i class="fas fa-utensils"></i></div>
+                    <div class="video-details">
+                        <div class="video-title">Cooking the Perfect Steak - Chef's Secret Recipe</div>
+                        <div class="channel-name">Cooking Master</div>
+                        <div class="video-stats">950K views • 5 days ago</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Video Card 5 -->
+            <div class="video-card" onclick="openVideoPlayer('https://www.eporner.com/embed/q1I7c73yLk3/')">
+                <div class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Yoga Routine">
+                    <div class="video-duration">12:30</div>
+                </div>
+                <div class="video-info">
+                    <div class="channel-icon"><i class="fas fa-spa"></i></div>
+                    <div class="video-details">
+                        <div class="video-title">Morning Yoga Routine for Beginners</div>
+                        <div class="channel-name">Yoga Life</div>
+                        <div class="video-stats">1.5M views • 2 weeks ago</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Video Card 6 -->
+            <div class="video-card" onclick="openVideoPlayer('https://www.eporner.com/embed/T6OlCtwYho0/')">
+                <div class="thumbnail">
+                    <img src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Gaming PC Build">
+                    <div class="video-duration">18:22</div>
+                </div>
+                <div class="video-info">
+                    <div class="channel-icon"><i class="fas fa-desktop"></i></div>
+                    <div class="video-details">
+                        <div class="video-title">How to Build a Gaming PC - Step by Step Guide</div>
+                        <div class="channel-name">Tech Guru</div>
+                        <div class="video-stats">3.2M views • 1 month ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Classic Banner Ad Slot - 468x60 -->
+        <div class="ad-slot classic-banner banner-468x60">
+            <div class="ad-label">ADVERTISEMENT</div>
+            <!-- Adsterra 468x60 Banner Code Here -->
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : 'd369df308379edf9e631ee0735910237',
+                    'format' : 'iframe',
+                    'height' : 60,
+                    'width' : 468,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="//bedsidemeasuring.com/d369df308379edf9e631ee0735910237/invoke.js"></script>
+        </div>
+    </div>
+    
+    <!-- Classic Banner Ad Slot - 160x600 (Sidebar) -->
+    <div class="ad-slot classic-banner banner-160x600">
+        <div class="ad-label">ADVERTISEMENT</div>
+        <!-- Adsterra 160x600 Banner Code Here -->
+        <script type="text/javascript">
+            atOptions = {
+                'key' : '16248d584675668e44a31152d7c26b58',
+                'format' : 'iframe',
+                'height' : 600,
+                'width' : 160,
+                'params' : {}
+            };
+        </script>
+        <script type="text/javascript" src="//bedsidemeasuring.com/16248d584675668e44a31152d7c26b58/invoke.js"></script>
+    </div>
+    
+    <!-- Social Bar -->
+    <div class="social-bar">
+        <!-- Adsterra Social Bar Code Here -->
+        <script type='text/javascript' src='//bedsidemeasuring.com/79/05/d3/7905d3397af2f4729e5270da2e72f5ac.js'></script>
+    </div>
+    
+    <!-- Video Player -->
+    <div class="video-player-container" id="videoPlayer">
+        <div class="video-player">
+            <button class="close-player" onclick="closeVideoPlayer()">✕</button>
+            <div id="videoFrameContainer"></div>
+            <div class="player-controls">
+                <button class="player-button" onclick="redirectToAd('watch')">Watch Now</button>
+                <button class="player-button" onclick="redirectToAd('play')">Play</button>
+                <button class="player-button" onclick="redirectToAd('skip')">Skip Now</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Video Pop-up Ad -->
+    <div class="video-popup-ad" id="videoPopupAd">
+        <div class="popup-content">
+            <div class="popup-header">
+                <div class="popup-title">Special Video Offer</div>
+                <button class="popup-close" onclick="closePopupAd()">✕</button>
+            </div>
+            <div class="popup-body">
+                <div class="popup-video-thumbnail" onclick="redirectToAd('play')">
+                    <img src="https://static-eu-cdn.eporner.com/thumbs/static4/1/13/136/13699885/1_240.jpg" alt="Video Thumbnail">
+                    <div class="popup-play-overlay">
+                        <div class="popup-play-button">
+                            <i class="fas fa-play"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-buttons">
+                    <button class="popup-button popup-watch-now" onclick="redirectToAd('watch')">Watch Now</button>
+                    <button class="popup-button popup-skip" onclick="redirectToAd('skip')">Skip Ad</button>
+                </div>
+            </div>
+            <div class="popup-footer">
+                Advertisement • By clicking any button you'll be redirected to our partner site
+            </div>
+        </div>
+    </div>
+    
+    <!-- Popunder Ad Script -->
+    <script type='text/javascript' src='//bedsidemeasuring.com/a4/53/77/a453773ac94d0df2616720f679d6d040.js'></script>
+    
+    <script>
+        // Video Player Functions
+        function openVideoPlayer(videoSrc) {
+            document.getElementById('videoPlayer').style.display = 'flex';
+            document.getElementById('videoFrameContainer').innerHTML = 
+                `<iframe width="100%" height="500" src="${videoSrc}" frameborder="0" allowfullscreen></iframe>`;
+        }
+        
+        function closeVideoPlayer() {
+            document.getElementById('videoPlayer').style.display = 'none';
+            document.getElementById('videoFrameContainer').innerHTML = '';
+        }
+        
+        // Video Pop-up Ad Functions
+        function showPopupAd() {
+            document.getElementById('videoPopupAd').style.display = 'flex';
+        }
+        
+        function closePopupAd() {
+            document.getElementById('videoPopupAd').style.display = 'none';
+            // Redirect when closing the popup
+            redirectToAd('close');
+        }
+        
+        // Ad Redirect Function
+        function redirectToAd(type) {
+            // Adsterra direct link for video ads
+            const adUrl = "https://www.profitablegatecpm.com/wiswu1gjte?key=7354006b00bf2a83aeeb99a771aa61a3";
+            
+            // Open the ad in a new tab
+            window.open(adUrl, '_blank');
+            
+            // Close the popup ad
+            document.getElementById('videoPopupAd').style.display = 'none';
+            
+            // Close the video player if it's a skip action
+            if (type === 'skip') {
+                closeVideoPlayer();
+            }
+        }
+        
+        // Close video player when clicking outside
+        document.getElementById('videoPlayer').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeVideoPlayer();
+            }
+        });
+        
+        // Close popup ad when clicking outside
+        document.getElementById('videoPopupAd').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePopupAd();
+            }
+        });
+        
+        // Show popup ad after 5 seconds
+        setTimeout(showPopupAd, 5000);
+        
+        // Show popup ad when user tries to leave the page
+        window.addEventListener('beforeunload', function() {
+            showPopupAd();
+        });
+        
+        // Trigger popunder on page load
+        window.addEventListener('load', function() {
+            // Popunder will be triggered by the external script
+        });
+    </script>
+</body>
+</html>
